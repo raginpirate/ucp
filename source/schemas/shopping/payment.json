@@ -11,7 +11,7 @@
     "handlers": {
       "type": "array",
       "items": {
-        "$ref": "types/payment_handler.json"
+        "$ref": "types/payment_handler.json#/$defs/response"
       },
       "description": "Processing configurations that define how payment instruments can be collected. Each handler specifies a tokenization or payment collection strategy.",
       "ucp_request": "omit"

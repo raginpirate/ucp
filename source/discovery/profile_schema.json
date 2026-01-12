@@ -18,7 +18,7 @@
           "type": "array",
           "description": "Payment handler definitions that describe how instruments can be collected",
           "items": {
-            "$ref": "../schemas/shopping/types/payment_handler.json"
+            "$ref": "../schemas/shopping/types/payment_handler.json#/$defs/discovery"
           }
         }
       }

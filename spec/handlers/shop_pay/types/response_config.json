@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/response_config.json",
+  "title": "ShopPayResponseConfig",
+  "description": "Runtime configuration for Shop Pay in checkout responses.",
+  "type": "object",
+  "required": ["shop_id"],
+  "properties": {
+    "shop_id": {
+      "type": "string",
+      "description": "The merchant's unique Shop Pay identifier.",
+      "examples": ["shopify-559128571"]
+    }
+  },
+  "additionalProperties": false
+}
+

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/business_config.json",
+  "title": "ShopPayBusinessConfig",
+  "description": "Business-level configuration for Shop Pay handler. Merchants advertise this configuration to enable platforms to process Shop Pay payments on their behalf.",
+  "type": "object",
+  "required": ["shop_id"],
+  "properties": {
+    "shop_id": {
+      "type": "string",
+      "description": "The merchant's unique Shop Pay identifier, obtained by registering your shop for Shop Pay.",
+      "examples": ["shopify-559128571"]
+    }
+  },
+  "additionalProperties": false
+}
+

@@ -38,34 +38,84 @@ If you're an external merchant, then you must register for Shop Pay to obtain yo
 
 ### Handler configuration
 
-Merchants advertise Shop Pay support by including the handler in their payment handlers array. The handler uses a minimal configuration containing only the merchant's Shop Pay identifier today.
+Merchants advertise Shop Pay support by including the handler in their payment handlers array. The Shop Pay handler uses a unified schema that defines three configuration levels: business, platform, and response.
 
-#### Configuration schema
+#### Configuration levels
 
-| Field | Type | Description |
-| - | - | - |
-| `shop_id` required | String | The merchant's unique Shop Pay identifier. |
+The handler schema defines distinct configuration contexts:
 
-The following example shows how merchants declare the Shop Pay handler in their payment configuration:
+| Level | Context | Required Fields | Description |
+| - | - | - | - |
+| `business_schema` | Merchant discovery | `shop_id` | Merchants advertise their Shop Pay identifier for platforms to discover. |
+| `platform_schema` | Platform discovery | `client_id` | Platforms advertise their registered agent identifier. |
+| `response_schema` | Checkout response | `shop_id` | Runtime configuration returned during active checkout sessions. |
+
+#### Business configuration (merchant)
+
+Merchants declare Shop Pay in their payment handlers to enable platform discovery:
 
 ```json
 {
-  "payment": {
-    "handlers": [
-      {
-        "id": "shop_pay",
-        "name": "dev.shopify.shop_pay",
-        "version": "2026-01-11",
-        "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
-        "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
-        "instrument_schemas": [
-          "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
-        ],
-        "config": {
-          "shop_id": "shopify-559128571"
+  "ucp": {
+    "payment_handlers": {
+      "dev.shopify.shop_pay": [
+        {
+          "id": "shop_pay",
+          "version": "2026-01-16",
+          "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+          "schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-16/schema.json",
+          "config": {
+            "shop_id": "shopify-559128571"
+          }
         }
-      }
-    ]
+      ]
+    }
+  }
+}
+```
+
+#### Platform configuration (agent)
+
+Platforms declare their Shop Pay client credentials to enable merchant discovery:
+
+```json
+{
+  "ucp": {
+    "payment_handlers": {
+      "dev.shopify.shop_pay": [
+        {
+          "id": "shop_pay",
+          "version": "2026-01-16",
+          "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
+          "schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-16/schema.json",
+          "config": {
+            "client_id": "agent-1234567890"
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+#### Response configuration (runtime)
+
+During active checkout sessions, merchants return the response configuration:
+
+```json
+{
+  "ucp": {
+    "payment_handlers": {
+      "dev.shopify.shop_pay": [
+        {
+          "id": "shop_pay",
+          "version": "2026-01-16",
+          "config": {
+            "shop_id": "shopify-559128571"
+          }
+        }
+      ]
+    }
   }
 }
 ```
@@ -87,7 +137,8 @@ Shop Pay instruments extend the base UCP payment instrument with Shop Pay-specif
 | `credential.type` required | String | Must be `shop_token`. |
 | `credential.token` required | String | The Shop Token from the delegated payment flow. |
 | `billing_address` required | Object | Billing address associated with the Shop Pay account. |
-| `email` | String | The buyer's email address associated with the Shop Pay account. |
+| `display` | Object | Display information for this Shop Pay instrument. |
+| `display.email` | String | The buyer's email address associated with the Shop Pay account. |
 
 Merchants receive a payment object structured as follows when an agent submits a Shop Pay payment:
 
@@ -103,7 +154,9 @@ Merchants receive a payment object structured as follows when an agent submits a
           "type": "shop_token",
           "token": "shop_abc123xyz789..."
         },
-        "email": "buyer@example.com",
+        "display": {
+          "email": "buyer@example.com"
+        },
         "billing_address": {
           "full_name": "Jane Doe",
           "street_address": "123 Main St",
@@ -135,23 +188,27 @@ Agents must follow this flow to process a `dev.shopify.shop_pay` handler:
 
 #### Step 1: Discover handler
 
-Identify `dev.shopify.shop_pay` in the merchant's payment handlers array from the checkout response or merchant profile.
+Identify `dev.shopify.shop_pay` in the merchant's `payment_handlers` map from the checkout response or merchant profile. The handler appears with the response configuration:
 
 ```json
 {
-    "id": "shop_pay",
-    "name": "dev.shopify.shop_pay",
-    "version": "2026-01-11",
-    "spec": "https://shopify.dev/docs/agents/checkout/shop-pay-handler",
-    "config_schema": "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json",
-    "instrument_schemas": [
-        "https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json"
-    ],
-    "config": {
-        "shop_id": "shopify-559128571"
+  "ucp": {
+    "payment_handlers": {
+      "dev.shopify.shop_pay": [
+        {
+          "id": "shop_pay",
+          "version": "2026-01-16",
+          "config": {
+            "shop_id": "shopify-559128571"
+          }
+        }
+      ]
     }
+  }
 }
 ```
+
+Agents can fetch the full handler schema from the merchant's business profile or platform discovery to access the schema URL.
 
 #### Step 2: Build payment request
 
@@ -191,7 +248,9 @@ UCP-Agent: profile="https://agent.example/profile"
       "type": "shop_token",
       "token": "shop_abc123xyz789..."
     },
-    "email": "buyer@example.com",
+    "display": {
+      "email": "buyer@example.com"
+    },
     "billing_address": {
       "full_name": "Jane Doe",
       "street_address": "123 Main St",
@@ -242,10 +301,16 @@ The Shop Pay handler implements multiple security measures to protect payment da
 
 ## Schema reference
 
-The following JSON schemas define the structure and validation rules for Shop Pay handler configuration and payment data:
+The Shop Pay handler uses a unified schema that defines all configuration levels and payment instrument types:
 
-* [Handler config schema](https://shopify.dev/ucp/shop-pay-handler/2026-01-11/config.json): Defines the required `shop_id` configuration field that merchants include when advertising the Shop Pay handler.
-* [Instrument schema](https://shopify.dev/ucp/shop-pay-handler/2026-01-11/instrument.json): Specifies the structure of Shop Pay payment instruments that agents submit and merchants process, including credential and billing address requirements.
-* [Credential schema](https://shopify.dev/ucp/shop-pay-handler/2026-01-11/credential.json): Details the Shop Token credential format used to authorize payments through the delegated flow.
+* [Handler schema](https://shopify.dev/ucp/shop-pay-handler/2026-01-16/schema.json): The root schema defining all Shop Pay handler components including business, platform, and response configurations.
+
+The schema references the following type definitions:
+
+* [Business config](https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/business_config.json): Merchant-level configuration with `shop_id` for discovery.
+* [Platform config](https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/platform_config.json): Platform-level configuration with `client_id` for agent registration.
+* [Response config](https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/response_config.json): Runtime configuration returned in checkout responses.
+* [Instrument schema](https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/shop_pay_instrument.json): Payment instrument structure extending the base UCP instrument.
+* [Credential schema](https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/shop_pay_credential.json): Shop Token credential format for delegated payments.
 
 ***

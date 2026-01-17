@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shopify.dev/ucp/shop-pay-handler/2026-01-16/schema.json",
+  "title": "Shop Pay Handler Schema",
+  "description": "Schema for the dev.shopify.shop_pay payment handler.",
+  "name": "dev.shopify.shop_pay",
+  "version": "2026-01-16",
+
+  "$defs": {
+    "shop_pay_credential": { "$ref": "types/shop_pay_credential.json" },
+    "shop_pay_instrument": { "$ref": "types/shop_pay_instrument.json" },
+
+    "dev.shopify.shop_pay": {
+      "payment_instrument": {
+        "title": "Shop Pay Payment Instrument",
+        "description": "Payment instrument for the Shop Pay handler.",
+        "$ref": "#/$defs/shop_pay_instrument"
+      },
+      "business_schema": {
+        "title": "Shop Pay Handler (Business)",
+        "description": "Business-level handler configuration for discovery.",
+        "allOf": [
+          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/business_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/business_config.json"
+              }
+            }
+          }
+        ]
+      },
+      "platform_schema": {
+        "title": "Shop Pay Handler (Platform)",
+        "description": "Platform-level handler configuration for discovery.",
+        "allOf": [
+          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/platform_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/platform_config.json"
+              }
+            }
+          }
+        ]
+      },
+      "response_schema": {
+        "title": "Shop Pay Handler (Response)",
+        "description": "Runtime handler configuration in checkout responses.",
+        "allOf": [
+          { "$ref": "https://ucp.dev/schemas/payment_handler.json#/$defs/response_schema" },
+          {
+            "type": "object",
+            "properties": {
+              "config": {
+                "$ref": "types/response_config.json"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

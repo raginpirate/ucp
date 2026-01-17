@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shopify.dev/ucp/shop-pay-handler/2026-01-16/types/platform_config.json",
+  "title": "ShopPayPlatformConfig",
+  "description": "Platform-level configuration for Shop Pay handler discovery.",
+  "type": "object",
+  "required": ["client_id"],
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "The agent's unique identifier, obtained by registering your agent for Shop Pay.",
+      "examples": ["agent-1234567890"]
+    }
+  },
+  "additionalProperties": false
+}
+

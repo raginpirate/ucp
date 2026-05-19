@@ -44,6 +44,10 @@
         "unrecoverable"
       ],
       "description": "Reflects the resource state and recommended action. 'recoverable': platform can resolve by modifying inputs and retrying via API. 'requires_buyer_input': merchant requires information their API doesn't support collecting programmatically (checkout incomplete). 'requires_buyer_review': buyer must authorize before order placement due to policy, regulatory, or entitlement rules. 'unrecoverable': no valid resource exists to act on, retry with new resource or inputs. Errors with 'requires_*' severity contribute to 'status: requires_escalation'."
+    },
+    "action": {
+      "$ref": "embedded_frame.json",
+      "description": "Optional rendering action the platform MAY perform as an alternative to escalation. When present on an error with 'requires_buyer_input' severity, the platform MAY render the action (typically display: visible) and resubmit on the same path once the frame signals completion, instead of handing off via 'continue_url'. This enables in-context resolution of blocking flows such as 3DS challenges, captchas, or redirect-based alternative payment method approvals. Platforms that do not support rendering the action MUST fall back to escalation via 'continue_url'; 'content' remains the authoritative description for that fallback."
     }
   }
 }

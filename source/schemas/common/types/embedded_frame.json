@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ucp.dev/schemas/common/types/embedded_frame.json",
+  "title": "Embedded Frame",
+  "description": "Generic frame-rendering primitive a business can attach to a message to request that the platform render a business-supplied URL. The frame's contents are opaque to the platform: it loads the URL, optionally surfaces it to the buyer, and waits for an in-frame completion signal before resubmitting on the same path. Covers non-blocking background data collection (display: hidden) and blocking buyer-interactive flows (display: visible). Use cases include 3DS device data collection, 3DS challenge, captcha and bot-detection challenges, redirect-based alternative payment method approval, and any future step-up flow that can be expressed as a hosted URL with a completion signal.",
+  "type": "object",
+  "required": ["url", "display"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Opaque business-supplied identifier the platform echoes back on resubmission. Lets a business correlate the frame completion with a specific request when multiple frames are in flight (e.g., DDC on several payment instruments)."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Absolute HTTPS URL the platform loads in the frame. Hosted by the business or a party it delegates to (e.g., its PSP). The platform does not interpret the contents; protocol-specific payloads (3DS, captcha vendors, etc.) stay between the business and its provider."
+    },
+    "display": {
+      "type": "string",
+      "enum": ["hidden", "visible"],
+      "description": "Rendering mode. 'hidden' means the platform loads the URL without exposing it to the buyer (background data collection); the platform MUST still allow the frame to execute network requests and post completion. 'visible' means the platform renders the frame to the buyer for interaction; the platform MUST surface it in a way appropriate to its UX (modal, sheet, dedicated view) and MUST allow the buyer to dismiss it."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp after which the frame is no longer valid. Platforms SHOULD stop waiting for completion past this time and resubmit reporting timeout, or surface a failure to the buyer for visible frames."
+    },
+    "dimensions": {
+      "type": "object",
+      "description": "Optional rendering hints for visible frames. Ignored when display is 'hidden'. Platforms MAY adapt these to their UX (e.g., a chat surface may show the frame inline at a different size).",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Suggested width in CSS pixels."
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Suggested height in CSS pixels."
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

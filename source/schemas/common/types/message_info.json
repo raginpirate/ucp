@@ -32,6 +32,10 @@
     "content": {
       "type": "string",
       "description": "Human-readable message."
+    },
+    "action": {
+      "$ref": "embedded_frame.json",
+      "description": "Optional rendering action the platform SHOULD perform to fulfill this message. When present on an info message, the action is non-blocking: the platform MAY perform it in the background while checkout remains in 'ready_for_complete', and SHOULD resubmit on the same path once the action completes. Typical use: collecting risk or abuse signals (e.g., 3DS device data collection, hidden bot-detection probes) where 'path' indicates the signal the business expects to be populated. Platforms that cannot render the action MAY ignore it; 'content' remains the authoritative description."
     }
   }
 }
